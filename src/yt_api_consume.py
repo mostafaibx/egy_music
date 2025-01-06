@@ -87,6 +87,8 @@ def get_data(query, max_results=50):
     page_count = 0
     MAX_PAGES_PER_KEYWORD = 50  # Safety limit
     video_ids = []
+    max_video_ids_per_request = 50  # Maximum supported IDs in a single request
+
 
     try:
         while page_count < MAX_PAGES_PER_KEYWORD:
@@ -102,7 +104,6 @@ def get_data(query, max_results=50):
                     maxResults=max_results,
                     location="26.8206,30.8025", #central cordiniation for efypt
                     locationRadius="500km",
-                    duration="medium",
                     order="viewCount",
                     pageToken=next_page_token
                 ).execute()
@@ -119,11 +120,23 @@ def get_data(query, max_results=50):
                 if video_id and video_id not in existing_video_ids:
                     video_ids.append(video_id)
 
+
+            # make sure we handle only 50 ids per request
+            video_ids_chunked = [video_ids[i:i + max_video_ids_per_request] for i in range(0, len(video_ids), max_video_ids_per_request)]
+
+            """ Example:
+                Let’s say video_ids = ['id1', 'id2', 'id3', ..., 'id100'] (i.e., 100 video IDs), and max_video_ids_per_request = 50.
+
+                First iteration: i = 0, it will create the chunk ['id1', 'id2', ..., 'id50'].
+                Second iteration: i = 50, it will create the chunk ['id51', 'id52', ..., 'id100']. """
+
+
             # Get video details
-            video_response = youtube.videos().list(
-                part="snippet,statistics,contentDetails,recordingDetails",
-                id=",".join(video_ids)
-            ).execute()
+            for chunk in video_ids_chunked:
+                video_response = youtube.videos().list(
+                    part="snippet,statistics,contentDetails,recordingDetails",
+                    id=",".join(chunk)
+                ).execute()
 
             for video in video_response['items']:
                 video_details = {
@@ -147,9 +160,10 @@ def get_data(query, max_results=50):
 
             # Save data incrementally
             if video_data:
+                print(f"Saving {len(video_data)} video details to CSV.")
                 df = pd.DataFrame(video_data)
                 df.to_csv(
-                    'data/youtube_music_data_egypt.csv',
+                    'youtube_music_data_egypt.csv',
                     index=False,
                     mode='a',
                     header=not os.path.exists('data/youtube_music_data_egypt.csv')
