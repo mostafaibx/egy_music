@@ -119,8 +119,9 @@ def get_data(query, max_results=50):
                 video_id = item['id']['videoId']
                 if video_id and video_id not in existing_video_ids:
                     video_ids.append(video_id)
-
-
+                    
+                    
+            save_video_ids(video_ids)
             # make sure we handle only 50 ids per request
             video_ids_chunked = [video_ids[i:i + max_video_ids_per_request] for i in range(0, len(video_ids), max_video_ids_per_request)]
 
