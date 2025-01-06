@@ -164,7 +164,7 @@ def get_data(query, max_results=50):
                 print(f"Saving {len(video_data)} video details to CSV.")
                 df = pd.DataFrame(video_data)
                 df.to_csv(
-                    'youtube_music_data_egypt.csv',
+                    'data/youtube_music_data_egypt.csv',
                     index=False,
                     mode='a',
                     header=not os.path.exists('data/youtube_music_data_egypt.csv')
