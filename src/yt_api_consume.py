@@ -16,6 +16,8 @@ os.makedirs(TOKEN_DIR, exist_ok=True)
 LAST_KEYWORD_FILE = 'data/last_keyword.json'
 VIDEO_IDS_FILE = 'data/video_ids.json'
 
+write_header = not os.path.exists('data/youtube_music_data_egypt.csv')
+
 
 # Load the video IDs from the JSON file and return as a set (for fast lookups and uniqueness)
 def load_existing_video_ids():
@@ -80,7 +82,7 @@ def load_last_keyword():
 
 
 # Main Data Fetching Function
-def get_data(query, max_results=50):
+def get_data(query, max_results=100):
     video_data = []
     next_page_token = load_next_page_token(query)
     existing_video_ids = load_existing_video_ids()  # Get the already fetched IDs
@@ -167,7 +169,7 @@ def get_data(query, max_results=50):
                     'data/youtube_music_data_egypt.csv',
                     index=False,
                     mode='a',
-                    header=not os.path.exists('data/youtube_music_data_egypt.csv')
+                    header=write_header os.path.exists('data/youtube_music_data_egypt.csv')
                 )
                 video_data = []  # Clear buffer
 
